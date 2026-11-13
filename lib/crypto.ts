@@ -1,22 +1,24 @@
 /**
  * Web Crypto API utilities for SkepticVault
  * PBKDF2 with 600,000 iterations for key derivation
- * AES-256-GCM for encryption
+ * AES-256-GCM for zero-knowledge client-side encryption
  */
 
 const ITERATIONS = 600000;
 const KEY_LENGTH = 256;
 const ALGORITHM = 'AES-GCM';
+const DOMAIN_SALT = 'skeptic_vault_domain_salt_v1:';
+
 export const SALT_KEY = 'sv_salt';
 export const ENCRYPTED_VAULT_KEY = 'sv_vault';
 
-export function buf2hex(buffer: ArrayBufferLike) {
+export function buf2hex(buffer: ArrayBufferLike): string {
   return Array.prototype.map
     .call(new Uint8Array(buffer), (x) => ('00' + x.toString(16)).slice(-2))
     .join('');
 }
 
-export function hex2buf(hexString: string) {
+export function hex2buf(hexString: string): ArrayBuffer {
   const bytes = new Uint8Array(Math.ceil(hexString.length / 2));
   for (let i = 0; i < bytes.length; i++) {
     bytes[i] = parseInt(hexString.substring(i * 2, i * 2 + 2), 16);
@@ -24,10 +26,37 @@ export function hex2buf(hexString: string) {
   return bytes.buffer;
 }
 
+/**
+ * Hash user identifier with domain separation to protect against precomputed rainbow tables.
+ * Also checks legacy un-salted hash for seamless backward compatibility.
+ */
 export async function hashIdentifier(identifier: string): Promise<string> {
   const enc = new TextEncoder();
-  const hashBuffer = await window.crypto.subtle.digest('SHA-256', enc.encode(identifier.toLowerCase().trim()));
-  return buf2hex(hashBuffer);
+  const cleanId = identifier.toLowerCase().trim();
+  
+  // Primary domain-salted hash
+  const saltedHashBuffer = await window.crypto.subtle.digest(
+    'SHA-256',
+    enc.encode(DOMAIN_SALT + cleanId)
+  );
+  const saltedHash = buf2hex(saltedHashBuffer);
+
+  // If modern salted salt exists in storage, return it
+  if (typeof window !== 'undefined' && localStorage.getItem(`salt_${saltedHash}`)) {
+    return saltedHash;
+  }
+
+  // Legacy fallback: check if user previously signed up with unsalted hash
+  const legacyHashBuffer = await window.crypto.subtle.digest(
+    'SHA-256',
+    enc.encode(cleanId)
+  );
+  const legacyHash = buf2hex(legacyHashBuffer);
+  if (typeof window !== 'undefined' && localStorage.getItem(`salt_${legacyHash}`)) {
+    return legacyHash;
+  }
+
+  return saltedHash;
 }
 
 export async function generateSalt(): Promise<Uint8Array> {
@@ -58,10 +87,13 @@ export async function deriveKey(password: string, salt: Uint8Array): Promise<Cry
   );
 }
 
-export async function encryptData(key: CryptoKey, data: string): Promise<{ ciphertext: string; iv: string }> {
+export async function encryptData(
+  key: CryptoKey,
+  data: string
+): Promise<{ ciphertext: string; iv: string }> {
   const enc = new TextEncoder();
   const iv = window.crypto.getRandomValues(new Uint8Array(12));
-  
+
   const encrypted = await window.crypto.subtle.encrypt(
     {
       name: ALGORITHM,
@@ -77,7 +109,11 @@ export async function encryptData(key: CryptoKey, data: string): Promise<{ ciphe
   };
 }
 
-export async function decryptData(key: CryptoKey, ciphertextHex: string, ivHex: string): Promise<string> {
+export async function decryptData(
+  key: CryptoKey,
+  ciphertextHex: string,
+  ivHex: string
+): Promise<string> {
   const dec = new TextDecoder();
   const decrypted = await window.crypto.subtle.decrypt(
     {

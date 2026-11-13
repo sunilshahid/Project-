@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Lock, ShieldAlert, Key, User, Eye, EyeOff } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 
 export function AuthView() {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
@@ -27,12 +26,7 @@ export function AuthView() {
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-sm"
-      >
+      <div className="w-full max-w-sm transition-all duration-300">
         <div className="flex justify-center mb-8">
           <div className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center relative overflow-hidden group">
             <div className="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -49,7 +43,9 @@ export function AuthView() {
           <form onSubmit={handleSubmit} className="p-4 space-y-4">
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Username or Email</label>
+                <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                  Username or Email
+                </label>
                 <div className="relative">
                   <User className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
                   <Input
@@ -65,21 +61,23 @@ export function AuthView() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Master Password</label>
+                <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                  Master Password
+                </label>
                 <div className="relative">
                   <Key className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
                   <Input
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder={mode === 'login' ? "Enter to decrypt..." : "Create a strong password..."}
+                    placeholder={mode === 'login' ? 'Enter to decrypt...' : 'Create a strong password...'}
                     className="pl-9 pr-10 bg-zinc-900 border-zinc-800 focus-visible:ring-emerald-500 text-zinc-100 h-10"
                     disabled={isUnlocking}
                   />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-2.5 text-zinc-500 hover:text-zinc-300"
                   >
@@ -88,43 +86,45 @@ export function AuthView() {
                 </div>
               </div>
             </div>
-            
-            <Button 
-              type="submit" 
+
+            <Button
+              type="submit"
               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white mt-4"
               disabled={isUnlocking || !password || !identifier}
             >
               {isUnlocking ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                  className="mr-2"
-                >
+                <div className="mr-2 animate-spin">
                   <Lock className="w-4 h-4" />
-                </motion.div>
+                </div>
               ) : (
                 <Lock className="w-4 h-4 mr-2" />
               )}
-              {isUnlocking ? (mode === 'login' ? 'Decrypting Vault...' : 'Creating Vault...') : (mode === 'login' ? 'Unlock Vault' : 'Create Vault')}
+              {isUnlocking
+                ? mode === 'login'
+                  ? 'Decrypting Vault...'
+                  : 'Creating Vault...'
+                : mode === 'login'
+                ? 'Unlock Vault'
+                : 'Create Vault'}
             </Button>
-            
+
             <div className="pt-2 text-center">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
                 className="text-xs text-zinc-400 hover:text-emerald-400 transition-colors"
                 disabled={isUnlocking}
               >
-                {mode === 'login' ? "Don't have an account? Sign up" : "Already have an account? Log in"}
+                {mode === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Log in'}
               </button>
             </div>
           </form>
         </Card>
-        
+
         <p className="text-center text-xs text-zinc-600 mt-8 font-mono">
           AES-256-GCM • PBKDF2-HMAC-SHA256
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 }

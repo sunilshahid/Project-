@@ -1,20 +1,25 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Skeptic's Vault: Zero-Knowledge Epistemic Notes & Fallacy Toolkit
 
-# Run and deploy your AI Studio app
+A private, client-side, zero-knowledge markdown note-taking environment and rationalist analysis workbench.
 
-This contains everything you need to run your app locally.
+## Core Features
 
-View your app in AI Studio: https://ai.studio/apps/3d5713de-2a4d-45fb-815f-69387a7e1e1d
+- **Zero-Knowledge Encryption:** Master-passphrase authenticated encryption using PBKDF2 (600,000 iterations) and AES-256-GCM. Note titles, content, tags, and fallacy checks are encrypted locally before persisting in localStorage.
+- **Client-Side Rationalist Toolkit:** Offline heuristic detection for 21 cognitive biases, informal fallacies, deductive traps, and epistemic razors (Ad Hominem, Straw Man, Post Hoc, Affirming the Consequent, Occam's Razor, etc.).
+- **Rich Markdown Editor:** Formatting, lists, quotes, code blocks, live tag bubbles, and markdown file export.
+- **Epistemic Check Tracker:** Systematic premise logging, counter-evidence documentation, and category-level fallacy distribution metrics.
+- **Zero Tracking:** 100% offline, zero telemetry, zero external network requests.
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
+## Getting Started
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+   ```bash
+   npm install
+   ```
+
+2. Run the development server (configured for port 2998):
+   ```bash
+   npm run dev
+   ```
+
+3. Open [http://localhost:2998](http://localhost:2998) in your browser.
